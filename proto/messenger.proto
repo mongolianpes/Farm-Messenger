@@ -11,10 +11,15 @@ message GetChatsRequest {
 }
 
 message GetChatsResponse {
+    repeated ChatInfo chats = 1;
+}
+
+message ChatInfo {
     int32 partnerID = 1;
     string partnerName = 2;
-    int32 relatedAnnouncementID = 3;
-    string relatedAnnouncementTitle = 4;
+    string relatedAnnouncementTitle = 3;
+    string partnerAvatarPath = 4;
+    int32 relatedAnnouncementID = 5;
 }
 
 message SendMessageRequest {
@@ -24,9 +29,7 @@ message SendMessageRequest {
     string text = 4;
 }
 
-message SendMessageResponse {
-    string error = 1;
-}
+message SendMessageResponse {}
 
 message GetChatHistoryRequest {
     int32 partnerID = 1;
@@ -41,7 +44,7 @@ message GetChatHistoryResponse {
 
 message GetChatHistoryMessage {
     string text = 1;
-    bool MyMessage = 2;
+    bool myMessage = 2;
     google.protobuf.Timestamp createAt = 3;
 }
 
