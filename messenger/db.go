@@ -51,7 +51,7 @@ func getChatsFromDB(db *sql.DB, userID int) (*pb.GetChatsResponse, error) {
 	var relatedAnnouncementTitle string
 	var relatedAnnouncementID int
 	for rows.Next() {
-		if err := rows.Scan(&partnerID, &partnerName, &partnerAvatarPath, &relatedAnnouncementTitle, &relatedAnnouncementTitle); err != nil {
+		if err := rows.Scan(&partnerID, &partnerName, &partnerAvatarPath, &relatedAnnouncementTitle, &relatedAnnouncementID); err != nil {
 			return nil, status.Error(codes.Internal, errorScanSQLrows+" "+err.Error())
 		}
 
@@ -96,6 +96,12 @@ func getChatHistoryFromDB(db *sql.DB, userID, partnerID, offset, relatedAnnounce
 		}
 
 		if senderID == int(userID) {
+			myMessage = true
+		} else {
+			myMessage = false
+		}
+
+		if senderID == userID {
 			myMessage = true
 		} else {
 			myMessage = false

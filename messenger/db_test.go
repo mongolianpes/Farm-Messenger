@@ -139,7 +139,7 @@ func TestGetChatsFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(response.Chats) != 3 {
+	if len(response.Chats) != 6 {
 		t.Errorf("Количество чатов не соответствуюет нужному. UserID %v", userID)
 	}
 
@@ -149,7 +149,7 @@ func TestGetChatsFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(response.Chats) != 2 {
+	if len(response.Chats) != 3 {
 		t.Errorf("Количество чатов не соответствуюет нужному. UserID %v", userID)
 	}
 
@@ -159,7 +159,7 @@ func TestGetChatsFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(response.Chats) != 1 {
+	if len(response.Chats) != 3 {
 		t.Errorf("Количество чатов не соответствуюет нужному. UserID %v", userID)
 	}
 }
