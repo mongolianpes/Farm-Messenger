@@ -5,6 +5,7 @@ import (
 	pb "messenger/proto"
 	"time"
 
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -31,10 +32,15 @@ JOIN announcements a
     ON a.announcement_id = m.related_announcement_id
 WHERE m.sender_id = $1 OR m.received_id = $1;`
 
+const databaseQueryErrorString = "Database query error"
+const (
+	errorScanSQLrows = "Error when scan SQL rows"
+)
+
 func getChatsFromDB(db *sql.DB, userID int) (*pb.GetChatsResponse, error) {
 	rows, err := db.Query(queryGetChats, userID)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Database query error")
+		return nil, status.Error(codes.Internal, databaseQueryErrorString)
 	}
 	defer rows.Close()
 
@@ -46,7 +52,7 @@ func getChatsFromDB(db *sql.DB, userID int) (*pb.GetChatsResponse, error) {
 	var relatedAnnouncementID int
 	for rows.Next() {
 		if err := rows.Scan(&partnerID, &partnerName, &partnerAvatarPath, &relatedAnnouncementTitle, &relatedAnnouncementTitle); err != nil {
-			return nil, status.Error(codes.Internal, "Database query error")
+			return nil, status.Error(codes.Internal, errorScanSQLrows+" "+err.Error())
 		}
 
 		chats = append(chats, &pb.ChatInfo{
@@ -65,7 +71,7 @@ func getChatsFromDB(db *sql.DB, userID int) (*pb.GetChatsResponse, error) {
 
 func saveMessageInDB(db *sql.DB, senderID, receivedID, relatedAnnouncementID int, text string) (*pb.SendMessageResponse, error) {
 	if _, err := db.Exec("INSERT INTO messages (sender_id, received_id, related_announcement_id, message) VALUES ($1, $2, $3, $4)", senderID, receivedID, relatedAnnouncementID, text); err != nil {
-		return nil, status.Error(codes.Internal, "Database query error")
+		return nil, status.Error(codes.Internal, databaseQueryErrorString)
 	}
 
 	return &pb.SendMessageResponse{}, nil
@@ -73,9 +79,9 @@ func saveMessageInDB(db *sql.DB, senderID, receivedID, relatedAnnouncementID int
 
 func getChatHistoryFromDB(db *sql.DB, userID, partnerID, offset, relatedAnnouncementID int) (*pb.GetChatHistoryResponse, error) {
 	query := "SELECT create_at, message, sender_id FROM messages WHERE ((sender_id = $1 AND received_id = $2) OR (sender_id = $2 AND received_id = $1)) AND related_announcement_id = $5 ORDER BY create_at DESC OFFSET $3 LIMIT $4"
-	rows, err := db.Query(query, userID, partnerID, offset, limitMessagesToShow, relatedAnnouncementID)
+	rows, err := db.Query(query, userID, partnerID, offset*limitMessagesToShow, limitMessagesToShow, relatedAnnouncementID)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Database query error")
+		return nil, status.Error(codes.Internal, databaseQueryErrorString)
 	}
 	defer rows.Close()
 
@@ -86,7 +92,7 @@ func getChatHistoryFromDB(db *sql.DB, userID, partnerID, offset, relatedAnnounce
 	var senderID int
 	for rows.Next() {
 		if err := rows.Scan(&createAt, &text, &senderID); err != nil {
-			return nil, status.Error(codes.Internal, "Database query error")
+			return nil, status.Error(codes.Internal, databaseQueryErrorString)
 		}
 
 		if senderID == int(userID) {
