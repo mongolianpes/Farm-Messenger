@@ -101,12 +101,6 @@ func getChatHistoryFromDB(db *sql.DB, userID, partnerID, offset, relatedAnnounce
 			myMessage = false
 		}
 
-		if senderID == userID {
-			myMessage = true
-		} else {
-			myMessage = false
-		}
-
 		messages = append(messages, &pb.GetChatHistoryMessage{
 			CreateAt:  timestamppb.New(createAt),
 			Text:      text,

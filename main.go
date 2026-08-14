@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net"
 
 	"messenger/messenger"
@@ -13,14 +13,14 @@ import (
 func main() {
 	lis, err := net.Listen("tcp", ":8086")
 	if err != nil {
-		log.Fatalf("не удалось слушать порт: %v", err)
+		slog.Error("не удалось слушать порт", "error", err)
 	}
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterMessengerServer(grpcServer, messenger.NewMessengerServer())
 
-	log.Println("gRPC сервер запущен на :8086")
+	slog.Info("Сервер запущен")
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("ошибка сервера: %v", err)
+		slog.Error("Ошибка при запуске сервера", "error", err)
 	}
 }

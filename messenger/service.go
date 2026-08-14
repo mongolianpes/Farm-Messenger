@@ -2,6 +2,7 @@ package messenger
 
 import (
 	"context"
+	"log/slog"
 
 	pb "messenger/proto"
 
@@ -19,10 +20,12 @@ func (s *MessengerServer) GetChats(ctx context.Context, req *pb.GetChatsRequest)
 
 func (s *MessengerServer) SendMessage(ctx context.Context, req *pb.SendMessageRequest) (*pb.SendMessageResponse, error) {
 	if req.SenderID == req.ReceivedID {
+		slog.Warn("Пользователь попытался отправить сообщение сам себе", "userID", req.SenderID)
 		return nil, status.Error(codes.InvalidArgument, cantSendMessageYourself)
 	}
 
 	if req.Text == "" {
+		slog.Warn("Пользователь попытался отправить пустое сообщение", "userID", req.SenderID)
 		return nil, status.Error(codes.InvalidArgument, cantSendEmptyMessage)
 	}
 
@@ -31,6 +34,7 @@ func (s *MessengerServer) SendMessage(ctx context.Context, req *pb.SendMessageRe
 
 func (s *MessengerServer) GetChatHistory(ctx context.Context, req *pb.GetChatHistoryRequest) (*pb.GetChatHistoryResponse, error) {
 	if req.UserID == req.PartnerID {
+		slog.Warn("Пользователь попытался получить историю чата с самими собой", "userID", req.UserID)
 		return nil, status.Error(codes.InvalidArgument, cantChatWithYourself)
 	}
 	return getChatHistoryFromDB(s.db, int(req.UserID), int(req.PartnerID), int(req.Offset), int(req.RelatedAnnouncementID))
