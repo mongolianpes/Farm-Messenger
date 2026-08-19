@@ -1,24 +1,23 @@
-package messenger
+package db
 
 import (
 	"database/sql"
 	"fmt"
-	pb "messenger/proto"
 	"os"
 )
 
-type MessengerServer struct {
-	pb.UnimplementedMessengerServer
-	db *sql.DB
-}
-
-func NewMessengerServer() *MessengerServer {
-	return &MessengerServer{
-		db: connectToDB(),
+func NewChatsStorage() (*PostgresStorage, error) {
+	db, err := connectToDB()
+	if err != nil {
+		return nil, err
 	}
+
+	return &PostgresStorage{
+		db: db,
+	}, nil
 }
 
-func connectToDB() *sql.DB {
+func connectToDB() (*sql.DB, error) {
 	// host := "localhost"
 	// port := "5432"
 	// user := "postgres"
@@ -34,13 +33,13 @@ func connectToDB() *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }

@@ -4,8 +4,9 @@ import (
 	"log/slog"
 	"net"
 
-	"messenger/messenger"
+	"messenger/db"
 	pb "messenger/proto"
+	"messenger/service"
 
 	"google.golang.org/grpc"
 )
@@ -17,7 +18,13 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterMessengerServer(grpcServer, messenger.NewMessengerServer())
+
+	storage, err := db.NewChatsStorage()
+	if err != nil {
+		panic(err)
+	}
+
+	pb.RegisterMessengerServer(grpcServer, service.NewMessengerServer(storage))
 
 	slog.Info("Сервер запущен")
 	if err := grpcServer.Serve(lis); err != nil {
