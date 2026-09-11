@@ -59,11 +59,11 @@ func (s *PostgresStorage) GetUserChats(userID int) (*pb.GetChatsResponse, error)
 		}
 
 		chats = append(chats, &pb.ChatInfo{
-			PartnerID:                int32(partnerID),
+			PartnerID:                int64(partnerID),
 			PartnerName:              partnerName,
 			RelatedAnnouncementTitle: relatedAnnouncementTitle,
 			PartnerAvatarPath:        partnerAvatarPath,
-			RelatedAnnouncementID:    int32(relatedAnnouncementID),
+			RelatedAnnouncementID:    int64(relatedAnnouncementID),
 		})
 	}
 
