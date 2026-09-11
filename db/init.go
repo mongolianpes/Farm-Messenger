@@ -18,12 +18,6 @@ func NewChatsStorage() (*PostgresStorage, error) {
 }
 
 func connectToDB() (*sql.DB, error) {
-	// host := "localhost"
-	// port := "5432"
-	// user := "postgres"
-	// password := "123"
-	// dbname := "project_farm"
-
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
