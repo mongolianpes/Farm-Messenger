@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 	"time"
@@ -130,13 +131,15 @@ func TestGetChatsFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
+	ctx := context.Background()
+
 	updMessages, err := updateTestMessages(s.db)
 	if err != nil {
 		t.Error(err)
 	}
 
 	userID := updMessages.usersIDs[0]
-	response, err := s.GetUserChats(userID)
+	response, err := s.GetUserChats(ctx, userID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -146,7 +149,7 @@ func TestGetChatsFromDB(t *testing.T) {
 	}
 
 	userID = updMessages.usersIDs[1]
-	response, err = s.GetUserChats(userID)
+	response, err = s.GetUserChats(ctx, userID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,7 +159,7 @@ func TestGetChatsFromDB(t *testing.T) {
 	}
 
 	userID = updMessages.usersIDs[2]
-	response, err = s.GetUserChats(userID)
+	response, err = s.GetUserChats(ctx, userID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -172,6 +175,8 @@ func TestSaveMessageInDB(t *testing.T) {
 		t.Error(err)
 	}
 
+	ctx := context.Background()
+
 	updMessages, err := updateTestUsers(s.db)
 	if err != nil {
 		t.Error(err)
@@ -186,7 +191,7 @@ func TestSaveMessageInDB(t *testing.T) {
 	receivedID := updMessages.usersIDs[1]
 	relatedAnnounID := updMessages.announcementsIDs[0]
 	messageText := "Здарова, это тестовое сообщение"
-	_, err = s.SaveMessage(senderID, receivedID, relatedAnnounID, messageText)
+	_, err = s.SaveMessage(ctx, senderID, receivedID, relatedAnnounID, messageText)
 	if err != nil {
 		t.Error(err)
 	}
@@ -224,6 +229,8 @@ func TestGetChatHistoryFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
+	ctx := context.Background()
+
 	updMessages, err := updateTestMessages(s.db)
 	if err != nil {
 		t.Error(err)
@@ -233,7 +240,7 @@ func TestGetChatHistoryFromDB(t *testing.T) {
 	partnerID := updMessages.usersIDs[1]
 	offset := 0
 	relatedAnnouncementID := updMessages.announcementsIDs[0]
-	response, err := s.GetChatHistory(userID, partnerID, offset, relatedAnnouncementID)
+	response, err := s.GetChatHistory(ctx, userID, partnerID, offset, relatedAnnouncementID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -243,7 +250,7 @@ func TestGetChatHistoryFromDB(t *testing.T) {
 	}
 
 	offset++
-	response, err = s.GetChatHistory(userID, partnerID, offset, relatedAnnouncementID)
+	response, err = s.GetChatHistory(ctx, userID, partnerID, offset, relatedAnnouncementID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -256,7 +263,7 @@ func TestGetChatHistoryFromDB(t *testing.T) {
 	partnerID = updMessages.usersIDs[0]
 	offset = 0
 	relatedAnnouncementID = updMessages.announcementsIDs[1]
-	response, err = s.GetChatHistory(userID, partnerID, offset, relatedAnnouncementID)
+	response, err = s.GetChatHistory(ctx, userID, partnerID, offset, relatedAnnouncementID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -269,7 +276,7 @@ func TestGetChatHistoryFromDB(t *testing.T) {
 	partnerID = updMessages.usersIDs[0]
 	offset = 0
 	relatedAnnouncementID = updMessages.announcementsIDs[0]
-	response, err = s.GetChatHistory(userID, partnerID, offset, relatedAnnouncementID)
+	response, err = s.GetChatHistory(ctx, userID, partnerID, offset, relatedAnnouncementID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -282,7 +289,7 @@ func TestGetChatHistoryFromDB(t *testing.T) {
 	partnerID = updMessages.usersIDs[0]
 	offset = 0
 	relatedAnnouncementID = updMessages.announcementsIDs[1]
-	response, err = s.GetChatHistory(userID, partnerID, offset, relatedAnnouncementID)
+	response, err = s.GetChatHistory(ctx, userID, partnerID, offset, relatedAnnouncementID)
 	if err != nil {
 		t.Error(err)
 	}

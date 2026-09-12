@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"net"
 
-	"messenger/db"
+	"messenger/internal/db"
+	"messenger/internal/service"
 	pb "messenger/proto"
-	"messenger/service"
 
 	"google.golang.org/grpc"
 )

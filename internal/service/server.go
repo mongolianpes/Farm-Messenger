@@ -1,7 +1,7 @@
 package service
 
 import (
-	"messenger/db"
+	"messenger/internal/db"
 	pb "messenger/proto"
 )
 

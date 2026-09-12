@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	pb "messenger/proto"
 	"time"
@@ -35,13 +36,13 @@ type PostgresStorage struct {
 }
 
 type ChatsStorage interface {
-	GetUserChats(userID int) (*pb.GetChatsResponse, error)
-	SaveMessage(senderID, receivedID, relatedAnnouncementID int, text string) (*pb.SendMessageResponse, error)
-	GetChatHistory(userID, partnerID, offset, relatedAnnouncementID int) (*pb.GetChatHistoryResponse, error)
+	GetUserChats(ctx context.Context, userID int) (*pb.GetChatsResponse, error)
+	SaveMessage(ctx context.Context, senderID, receivedID, relatedAnnouncementID int, text string) (*pb.SendMessageResponse, error)
+	GetChatHistory(ctx context.Context, userID, partnerID, offset, relatedAnnouncementID int) (*pb.GetChatHistoryResponse, error)
 }
 
-func (s *PostgresStorage) GetUserChats(userID int) (*pb.GetChatsResponse, error) {
-	rows, err := s.db.Query(queryGetChats, userID)
+func (s *PostgresStorage) GetUserChats(ctx context.Context, userID int) (*pb.GetChatsResponse, error) {
+	rows, err := s.db.QueryContext(ctx, queryGetChats, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -72,17 +73,17 @@ func (s *PostgresStorage) GetUserChats(userID int) (*pb.GetChatsResponse, error)
 	}, nil
 }
 
-func (s *PostgresStorage) SaveMessage(senderID, receivedID, relatedAnnouncementID int, text string) (*pb.SendMessageResponse, error) {
-	if _, err := s.db.Exec("INSERT INTO messages (sender_id, received_id, related_announcement_id, message) VALUES ($1, $2, $3, $4)", senderID, receivedID, relatedAnnouncementID, text); err != nil {
+func (s *PostgresStorage) SaveMessage(ctx context.Context, senderID, receivedID, relatedAnnouncementID int, text string) (*pb.SendMessageResponse, error) {
+	if _, err := s.db.ExecContext(ctx, "INSERT INTO messages (sender_id, received_id, related_announcement_id, message) VALUES ($1, $2, $3, $4)", senderID, receivedID, relatedAnnouncementID, text); err != nil {
 		return nil, err
 	}
 
 	return &pb.SendMessageResponse{}, nil
 }
 
-func (s *PostgresStorage) GetChatHistory(userID, partnerID, offset, relatedAnnouncementID int) (*pb.GetChatHistoryResponse, error) {
+func (s *PostgresStorage) GetChatHistory(ctx context.Context, userID, partnerID, offset, relatedAnnouncementID int) (*pb.GetChatHistoryResponse, error) {
 	query := "SELECT create_at, message, sender_id FROM messages WHERE ((sender_id = $1 AND received_id = $2) OR (sender_id = $2 AND received_id = $1)) AND related_announcement_id = $5 ORDER BY create_at DESC OFFSET $3 LIMIT $4"
-	rows, err := s.db.Query(query, userID, partnerID, offset*limitMessagesToShow, limitMessagesToShow, relatedAnnouncementID)
+	rows, err := s.db.QueryContext(ctx, query, userID, partnerID, offset*limitMessagesToShow, limitMessagesToShow, relatedAnnouncementID)
 	if err != nil {
 		return nil, err
 	}

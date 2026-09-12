@@ -15,7 +15,7 @@ var (
 )
 
 func (s *MessengerServer) GetChats(ctx context.Context, req *pb.GetChatsRequest) (*pb.GetChatsResponse, error) {
-	resp, err := s.storage.GetUserChats(int(req.UserID))
+	resp, err := s.storage.GetUserChats(ctx, int(req.UserID))
 	if err != nil {
 		slog.Warn("Пользователь попытался получить свои чаты, но возникла ошибка", "error", err)
 		return nil, err
@@ -35,7 +35,7 @@ func (s *MessengerServer) SendMessage(ctx context.Context, req *pb.SendMessageRe
 		return nil, cantSendEmptyMessageError
 	}
 
-	resp, err := s.storage.SaveMessage(int(req.SenderID), int(req.ReceivedID), int(req.RelatedAnnouncementID), req.Text)
+	resp, err := s.storage.SaveMessage(ctx, int(req.SenderID), int(req.ReceivedID), int(req.RelatedAnnouncementID), req.Text)
 	if err != nil {
 		slog.Warn("Пользователь попытался отправить сообщение, но возникла ошибка", "error", err)
 		return nil, err
@@ -52,7 +52,7 @@ func (s *MessengerServer) GetChatHistory(ctx context.Context, req *pb.GetChatHis
 		return nil, cantChatWithYourselfError
 	}
 
-	resp, err := s.storage.GetChatHistory(int(req.UserID), int(req.PartnerID), int(req.Offset), int(req.RelatedAnnouncementID))
+	resp, err := s.storage.GetChatHistory(ctx, int(req.UserID), int(req.PartnerID), int(req.Offset), int(req.RelatedAnnouncementID))
 	if err != nil {
 		slog.Warn("Пользователь попытался получить чат, но возникла ошибка", "error", err)
 		return nil, err
